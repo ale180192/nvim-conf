@@ -29,3 +29,6 @@ vim.g.netrw_winsize = 25
 -- Evitar que Netrw se abra automáticamente
 vim.g.netrw_keepdir = 0
 vim.g.netrw_silent = 1
+
+-- Configuración de sesiones
+vim.opt.sessionoptions = "buffers,curdir,folds,help,options,tabpages,terminal,winsize"

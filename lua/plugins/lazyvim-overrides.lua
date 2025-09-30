@@ -17,16 +17,16 @@ return {
   -- Configurar bufferline con picker
   {
     "akinsho/bufferline.nvim",
+    event = "VeryLazy",
+    keys = {
+      { "<leader>bp", ":BufferLinePick<CR>", desc = "Pick Buffer" },
+      { "<leader>bc", ":BufferLinePickClose<CR>", desc = "Pick Buffer to Close" },
+    },
     opts = {
       options = {
         pick = {
-          alphabet = "abcdefghijklmnopqrstuvwxyz", -- Solo minúsculas para más buffers
+          alphabet = "abcdefghijklmnopqrstuvwxyz",
         },
-        show_buffer_close_icons = true,
-        show_close_icon = true,
-        show_tab_indicators = true,
-        show_buffer_icons = true,
-        show_buffer_default_icon = true,
         show_buffer_close_icons = true,
         show_close_icon = true,
         show_tab_indicators = true,
@@ -34,20 +34,6 @@ return {
         show_buffer_default_icon = true,
       },
     },
-    keys = {
-      { "<leader>bp", ":BufferLinePick<CR>", desc = "Pick Buffer" },
-      { "<leader>bc", ":BufferLinePickClose<CR>", desc = "Pick Buffer to Close" },
-    },
-    config = function()
-      -- Asegurar que el picker esté habilitado
-      require("bufferline").setup({
-        options = {
-          pick = {
-            alphabet = "abcdefghijklmnopqrstuvwxyz",
-          },
-        },
-      })
-    end,
   },
 
   -- we activate and configure telescope
@@ -114,6 +100,43 @@ return {
     -- Forzar activación en proyectos de Poetry
     cond = function()
       return vim.fn.filereadable(vim.fn.getcwd() .. "/pyproject.toml") == 1
+    end,
+  },
+
+  -- Plugin para manejo de terminales
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    cmd = { "ToggleTerm", "TermExec", "ToggleTermToggleAll" },
+    keys = {
+      { "<leader>tt", ":ToggleTerm<CR>", desc = "Toggle Terminal" },
+      { "<leader>tf", ":ToggleTerm direction=float<CR>", desc = "Toggle Float Terminal" },
+      { "<leader>th", ":ToggleTerm direction=horizontal<CR>", desc = "Toggle Horizontal Terminal" },
+      { "<leader>tv", ":ToggleTerm direction=vertical<CR>", desc = "Toggle Vertical Terminal" },
+    },
+    config = function()
+      require("toggleterm").setup({
+        size = 20,
+        open_mapping = [[<c-\>]],
+        hide_numbers = true,
+        shade_filetypes = {},
+        shade_terminals = true,
+        shading_factor = 2,
+        start_in_insert = true,
+        insert_mappings = true,
+        persist_size = true,
+        direction = "horizontal",
+        close_on_exit = true,
+        shell = vim.o.shell,
+        float_opts = {
+          border = "curved",
+          winblend = 0,
+          highlights = {
+            border = "Normal",
+            background = "Normal",
+          },
+        },
+      })
     end,
   },
 
@@ -353,3 +376,4 @@ return {
   
   -- La configuración de scrolloff se movió a lua/config/options.lua
 }
+

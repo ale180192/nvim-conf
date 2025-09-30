@@ -11,3 +11,8 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
 -- Atajos para salir del modo inserción
 vim.keymap.set("i", "kj", "<Esc>", { desc = "Exit insert mode" })
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+
+-- Atajos para manejo de sesiones
+vim.keymap.set("n", "<leader>ms", ":mksession! Session.vim<CR>", { desc = "Save session" })
+vim.keymap.set("n", "<leader>ml", ":source Session.vim<CR>", { desc = "Load session" })
+vim.keymap.set("n", "<leader>md", ":!rm Session.vim<CR>", { desc = "Delete session" })
