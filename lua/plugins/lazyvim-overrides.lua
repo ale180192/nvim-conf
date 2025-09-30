@@ -56,6 +56,9 @@ return {
     cmd = "Telescope",
     keys = {
       { "<leader>ff", ":Telescope find_files<CR>", desc = "Find Files" },
+      { "<leader>fg", ":Telescope live_grep<CR>", desc = "Live Grep" },
+      { "<leader>fb", ":Telescope buffers<CR>", desc = "Find Buffers" },
+      { "<leader>fh", ":Telescope help_tags<CR>", desc = "Find Help" },
     },
     config = function()
       require("telescope").setup({
