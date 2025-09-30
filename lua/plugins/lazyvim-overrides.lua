@@ -93,7 +93,7 @@ return {
   
   -- Configurar Mason para evitar errores
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = {
       ui = {
         border = "rounded",
@@ -101,7 +101,20 @@ return {
     },
   },
   
-  -- Configurar LSP para Python con Poetry
+  -- Plugin para manejo de Poetry
+  {
+    "karloskar/poetry-nvim",
+    ft = "python",
+    config = function()
+      require("poetry-nvim").setup()
+    end,
+    -- Forzar activación en proyectos de Poetry
+    cond = function()
+      return vim.fn.filereadable(vim.fn.getcwd() .. "/pyproject.toml") == 1
+    end,
+  },
+
+  -- Configurar LSP para Python (ahora con poetry-nvim)
   {
     "neovim/nvim-lspconfig",
     opts = {
@@ -119,30 +132,25 @@ return {
             },
           },
           on_attach = function(client, bufnr)
-            -- Configurar para Poetry de forma más robusta
+            -- Función para obtener el path de Python de Poetry
             local function get_poetry_python_path()
               local current_dir = vim.fn.getcwd()
               
-              -- Verificar si estamos en un proyecto de Poetry
-              if vim.fn.filereadable(current_dir .. "/pyproject.toml") == 1 then
-                -- Método 1: Intentar obtener el path del entorno de Poetry
-                local handle = io.popen("cd " .. current_dir .. " && poetry env info --path 2>/dev/null")
-                if handle then
-                  local poetry_path = handle:read("*a"):gsub("%s+", "")
-                  handle:close()
-                  
-                  if poetry_path and poetry_path ~= "" and vim.fn.isdirectory(poetry_path) == 1 then
-                    local python_path = poetry_path .. "/bin/python"
-                    if vim.fn.filereadable(python_path) == 1 then
-                      return python_path
-                    end
-                  end
+              -- Verificar si poetry-nvim configuró VIRTUAL_ENV
+              local virtual_env = vim.env.VIRTUAL_ENV
+              if virtual_env then
+                local python_path = virtual_env .. "/bin/python"
+                if vim.fn.filereadable(python_path) == 1 then
+                  return python_path
                 end
-                
-                -- Método 2: Buscar en el directorio de Poetry cache
+              end
+              
+              -- Fallback: buscar manualmente el entorno de Poetry
+              if vim.fn.filereadable(current_dir .. "/pyproject.toml") == 1 then
                 local poetry_cache = vim.fn.expand("~/Library/Caches/pypoetry/virtualenvs")
                 if vim.fn.isdirectory(poetry_cache) == 1 then
-                  local handle = io.popen("find " .. poetry_cache .. " -name 'learning-api*' -type d 2>/dev/null | head -1")
+                  -- Buscar el entorno correcto (NJddIv5g)
+                  local handle = io.popen("find " .. poetry_cache .. " -name 'learning-api-NJddIv5g*' -type d 2>/dev/null | head -1")
                   if handle then
                     local venv_dir = handle:read("*a"):gsub("%s+", "")
                     handle:close()
@@ -155,31 +163,18 @@ return {
                     end
                   end
                 end
-                
-                -- Método 3: Buscar en el directorio actual
-                local poetry_venv = current_dir .. "/.venv/bin/python"
-                if vim.fn.filereadable(poetry_venv) == 1 then
-                  return poetry_venv
-                end
               end
               
-              -- Fallback: usar el python del sistema
-              return vim.fn.exepath("python3") or vim.fn.exepath("python")
+              return nil
             end
             
             local python_path = get_poetry_python_path()
             if python_path then
-              -- Actualizar la configuración del cliente
               client.config.settings.python.defaultInterpreterPath = python_path
               client.config.settings.python.pythonPath = python_path
-              
-              -- Notificar al usuario
               vim.notify("Python LSP configured with Poetry env: " .. python_path, vim.log.levels.INFO)
-              
-              -- Debug: mostrar información adicional
-              print("Poetry Python path detected: " .. python_path)
             else
-              vim.notify("Could not find Python interpreter for Poetry environment", vim.log.levels.WARN)
+              vim.notify("Could not find Poetry environment", vim.log.levels.WARN)
             end
           end,
         },

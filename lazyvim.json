@@ -1,8 +1,4 @@
 {
-  "extras": [
-    "lang.typescript",
-    "lang.python"
-  ],
   "install_version": 8,
   "news": {
     "NEWS.md": "11866",
