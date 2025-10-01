@@ -140,6 +140,105 @@ return {
     end,
   },
 
+  -- Plugin para AI como Cursor IDE
+  {
+    "yetone/avante.nvim",
+    build = vim.fn.has("win32") ~= 0
+        and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
+        or "make",
+    event = "VeryLazy",
+    version = false, -- Never set this value to "*"! Never!
+    acp_providers = {
+    ["gemini-cli"] = {
+      command = "gemini",
+      args = { "--experimental-acp" },
+      env = {
+        NODE_NO_WARNINGS = "1",
+        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY"),
+      },
+      auth_method = "gemini-api-key",
+    },
+    ["claude-code"] = {
+      command = "npx",
+      args = { "@zed-industries/claude-code-acp" },
+      env = {
+        NODE_NO_WARNINGS = "1",
+        ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY"),
+        ANTHROPIC_BASE_URL = os.getenv("ANTHROPIC_BASE_URL"),
+        ACP_PATH_TO_CLAUDE_CODE_EXECUTABLE = vim.fn.exepath("claude"),
+        ACP_PERMISSION_MODE = "bypassPermissions",
+      },
+    },
+  },
+    keys = {
+      { "<leader>aa", ":Avante<CR>", desc = "Avante AI Chat" },
+      { "<leader>ap", ":AvantePlanning<CR>", desc = "Avante Planning" },
+      { "<leader>ae", ":AvanteEditing<CR>", desc = "Avante Editing" },
+      { "<leader>as", ":AvanteSuggesting<CR>", desc = "Avante Suggesting" },
+      { "<leader>ac", ":AvanteCodebase<CR>", desc = "Avante Codebase" },
+    },
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-mini/mini.pick",
+      "nvim-telescope/telescope.nvim",
+      "hrsh7th/nvim-cmp",
+      "ibhagwan/fzf-lua",
+      "stevearc/dressing.nvim",
+      "folke/snacks.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "zbirenbaum/copilot.lua",
+      {
+        "HakonHarnes/img-clip.nvim",
+        event = "VeryLazy",
+        opts = {
+          default = {
+            embed_image_as_base64 = false,
+            prompt_for_file_name = false,
+            drag_and_drop = {
+              insert_mode = true,
+            },
+            use_absolute_path = true,
+          },
+        },
+      },
+      {
+        'MeanderingProgrammer/render-markdown.nvim',
+        opts = {
+          file_types = { "markdown", "Avante" },
+        },
+        ft = { "markdown", "Avante" },
+      },
+    },
+    config = function()
+      -- Definir signos antes de setup para evitar errores
+      vim.fn.sign_define("AvanteInputPromptSign", {
+        text = ">",
+        texthl = "AvanteInputPromptSign",
+        linehl = "AvanteInputPromptSign",
+        numhl = "AvanteInputPromptSign",
+      })
+      
+      require("avante").setup({
+        -- Configuración básica
+        mode = "agentic",
+        -- Configuración de providers
+        provider = "claude",
+        providers = {
+          claude = {
+            endpoint = "https://api.anthropic.com",
+            model = "claude-sonnet-4-20250514",
+            timeout = 30000,
+            extra_request_body = {
+              temperature = 0.75,
+              max_tokens = 20480,
+            },
+          },
+        },
+      })
+    end,
+  },
+
   -- Configurar LSP para Python (ahora con poetry-nvim)
   {
     "neovim/nvim-lspconfig",
